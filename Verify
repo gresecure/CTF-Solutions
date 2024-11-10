@@ -1,0 +1,42 @@
+## Challenge Name: Verify
+The goal of this challenge is to verify a checksum, identify the correct file, and decrypt it to reveal the flag.
+### Approach
+1. **Understand and analyse the nature of challenge.**
+-Go through the instructions of the challenge
+2. **Connect to the remote server (web shell)**
+-We start by connecting to the provided server via SSH. The command is:
+```bash
+ssh -p 59766 ctf-player@rhea.picoctf.net
+-Here , -p 59766 specifies the port number.
+ctf-player@rhea.picoctf.net is the user and host address.
+Upon connecting, you’re prompted with a security fingerprint. Type yes to continue, then enter the provided password.
+3. **List avaliable Files**
+O-nce logged in, we use the ls command to check what files are available in the current directory:
+input : ls
+output : checksum.txt  decrypt.sh  files
+This shows that we have a checksum.txt file, a decrypt.sh script, and a files directory.
+4. **View the Checksum**
+input : cat checksum.txt
+output : 467a10447deb3d4e17634cacc2a68ba6c2bb62a6637dad9145ea673bf0be5e02
+This is the SHA-256 hash we’ll use to verify one of the files in the files directory.
+5.**Calculate SHA-256 Checksums of All Files**
+Next, we calculate the SHA-256 hash for each file in the files directory. This helps us identify which file matches the checksum from checksum.txt.
+input : sha256sum files/*
+The output lists the SHA-256 hashes of all files in the files directory.
+6. **Filter for the Matching Hash**
+To find the specific file with a matching checksum, we use the grep command:
+input : sha256sum files/* | grep "467a10447deb3d4e17634cacc2a68ba6c2bb62a6637dad9145ea673bf0be5e02"
+output : 467a10447deb3d4e17634cacc2a68ba6c2bb62a6637dad9145ea673bf0be5e02  files/c6c8b911
+This output confirms that files/c6c8b911 is the file with the matching hash.
+7.**Identify the File Type**
+We use the file command to check the type of files/c6c8b911:
+input :file files/c6c8b911
+files/c6c8b911: openssl enc'd data with salted password
+This indicates that the file is encrypted with OpenSSL, meaning we’ll need a password to decrypt it.
+8.**Decrypt the File**
+The challenge provides a decryption script (decrypt.sh). We run this script, passing in the encrypted file to retrieve the flag:
+./decrypt.sh files/c6c8b911
+picoCTF{trust_but_verify_c6c8b911}
+This reveals the flag: picoCTF{trust_but_verify_c6c8b911}.
+
+This challenge tested our knowledge of basic Linux commands, checksum verification, and file decryption. By following each step, we successfully identified the correct file and decrypted it to reveal the flag.
